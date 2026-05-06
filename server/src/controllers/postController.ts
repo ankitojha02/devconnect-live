@@ -45,3 +45,49 @@ export const getAllPosts = async (
     });
   }
 };
+
+export const likePost = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const postId = req.params.id;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
+      });
+    }
+
+    const alreadyLiked = post.likes.includes(
+      req.userId as any
+    );
+
+    if (alreadyLiked) {
+      post.likes = post.likes.filter(
+        (id) => id.toString() !== req.userId
+      );
+
+      await post.save();
+
+      return res.json({
+        message: "Post unliked ❌",
+      });
+    }
+
+    post.likes.push(req.userId as any);
+
+    await post.save();
+
+    res.json({
+      message: "Post liked ❤️",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Like failed",
+      error,
+    });
+  }
+};
