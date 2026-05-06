@@ -91,3 +91,37 @@ export const likePost = async (
     });
   }
 };
+
+export const addComment = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const { text } = req.body;
+
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
+      });
+    }
+
+    post.comments.push({
+      user: req.userId as any,
+      text,
+    } as any);
+
+    await post.save();
+
+    res.json({
+      message: "Comment added 💬",
+      comments: post.comments,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Comment failed",
+      error,
+    });
+  }
+};
