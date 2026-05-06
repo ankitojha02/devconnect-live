@@ -125,3 +125,73 @@ export const addComment = async (
     });
   }
 };
+
+export const updatePost = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const { content, image } = req.body;
+
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
+      });
+    }
+
+    if (post.author.toString() !== req.userId) {
+      return res.status(403).json({
+        message: "Unauthorized",
+      });
+    }
+
+    post.content = content || post.content;
+    post.image = image || post.image;
+
+    await post.save();
+
+    res.json({
+      message: "Post updated ✏️",
+      post,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Update failed",
+      error,
+    });
+  }
+};
+
+export const deletePost = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found",
+      });
+    }
+
+    if (post.author.toString() !== req.userId) {
+      return res.status(403).json({
+        message: "Unauthorized",
+      });
+    }
+
+    await post.deleteOne();
+
+    res.json({
+      message: "Post deleted 🗑️",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Delete failed",
+      error,
+    });
+  }
+};
