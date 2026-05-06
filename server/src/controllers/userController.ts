@@ -18,3 +18,46 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ message: "Update failed", error });
   }
 };
+
+export const followUser = async (req: AuthRequest, res: Response) => {
+  try {
+    const targetUserId = req.params.id;
+    const currentUserId = req.userId;
+
+    if (targetUserId === currentUserId) {
+      return res.status(400).json({
+        message: "Cannot follow yourself",
+      });
+    }
+
+    const user = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!user || !targetUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (user.following.includes(targetUserId as any)) {
+      return res.status(400).json({
+        message: "Already following",
+      });
+    }
+
+    user.following.push(targetUserId as any);
+    targetUser.followers.push(currentUserId as any);
+
+    await user.save();
+    await targetUser.save();
+
+    res.json({
+      message: "Followed successfully ✅",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Follow failed",
+      error,
+    });
+  }
+};

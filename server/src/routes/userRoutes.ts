@@ -2,7 +2,7 @@ import express from "express";
 import { User } from "../models/User.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { AuthRequest } from "../types/express.js";
-import { updateProfile } from "../controllers/userController.js";
+import { updateProfile, followUser } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -23,4 +23,5 @@ router.get("/profile", protect, async (req : AuthRequest, res) => {
 });
 
 router.put("/profile", protect, updateProfile);
+router.post("/follow/:id", protect, followUser);
 export default router;
