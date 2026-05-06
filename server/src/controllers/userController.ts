@@ -61,3 +61,42 @@ export const followUser = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+export const unfollowUser = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const targetUserId = req.params.id;
+    const currentUserId = req.userId;
+
+    const user = await User.findById(currentUserId);
+    const targetUser = await User.findById(targetUserId);
+
+    if (!user || !targetUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    user.following = user.following.filter(
+      (id) => id.toString() !== targetUserId
+    );
+
+    targetUser.followers = targetUser.followers.filter(
+      (id) => id.toString() !== currentUserId
+    );
+
+    await user.save();
+    await targetUser.save();
+
+    res.json({
+      message: "Unfollowed successfully ❌",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Unfollow failed",
+      error,
+    });
+  }
+};

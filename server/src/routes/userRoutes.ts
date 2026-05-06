@@ -2,7 +2,7 @@ import express from "express";
 import { User } from "../models/User.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { AuthRequest } from "../types/express.js";
-import { updateProfile, followUser } from "../controllers/userController.js";
+import { updateProfile, followUser, unfollowUser } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -24,4 +24,23 @@ router.get("/profile", protect, async (req : AuthRequest, res) => {
 
 router.put("/profile", protect, updateProfile);
 router.post("/follow/:id", protect, followUser);
+router.post("/unfollow/:id", protect, unfollowUser);
+
+router.get("/:id/followers", protect, async (req, res) => {
+  const user = await User.findById(req.params.id)
+    .populate("followers", "name email");
+
+  res.json({
+    followers: user?.followers,
+  });
+});
+
+router.get("/:id/following", protect, async (req, res) => {
+  const user = await User.findById(req.params.id)
+    .populate("following", "name email");
+
+  res.json({
+    following: user?.following,
+  });
+});
 export default router;
