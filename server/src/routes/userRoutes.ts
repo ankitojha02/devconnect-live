@@ -2,7 +2,7 @@ import express from "express";
 import { User } from "../models/User.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { AuthRequest } from "../types/express.js";
-import { updateProfile, followUser, unfollowUser } from "../controllers/userController.js";
+import { updateProfile, followUser, unfollowUser, searchUsers } from "../controllers/userController.js";
 
 const router = express.Router();
 
@@ -25,6 +25,8 @@ router.get("/profile", protect, async (req : AuthRequest, res) => {
 router.put("/profile", protect, updateProfile);
 router.post("/follow/:id", protect, followUser);
 router.post("/unfollow/:id", protect, unfollowUser);
+
+router.get("/search/users", protect, searchUsers);
 
 router.get("/:id/followers", protect, async (req, res) => {
   const user = await User.findById(req.params.id)

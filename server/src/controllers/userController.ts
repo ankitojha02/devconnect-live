@@ -100,3 +100,37 @@ export const unfollowUser = async (
     });
   }
 };
+
+export const searchUsers = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const keyword = req.query.search;
+
+   const users = await User.find({
+  $or: [
+    {
+      name: {
+        $regex: keyword,
+        $options: "i",
+      },
+    },
+
+    {
+      email: {
+        $regex: keyword,
+        $options: "i",
+      },
+    },
+  ],
+} as any).select("-password");
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({
+      message: "Search failed",
+      error,
+    });
+  }
+};
