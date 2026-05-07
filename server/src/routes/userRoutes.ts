@@ -3,6 +3,8 @@ import { User } from "../models/User.js";
 import { protect } from "../middleware/authMiddleware.js";
 import { AuthRequest } from "../types/express.js";
 import { updateProfile, followUser, unfollowUser, searchUsers } from "../controllers/userController.js";
+import { uploadAvatar } from "../controllers/profileController.js";
+import { upload } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -23,6 +25,14 @@ router.get("/profile", protect, async (req : AuthRequest, res) => {
 });
 
 router.put("/profile", protect, updateProfile);
+
+router.post(
+  "/avatar",
+  protect,
+  upload.single("image"),
+  uploadAvatar
+);
+
 router.post("/follow/:id", protect, followUser);
 router.post("/unfollow/:id", protect, unfollowUser);
 
