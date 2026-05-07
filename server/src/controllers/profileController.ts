@@ -51,7 +51,7 @@ export const uploadAvatar = async (
   } catch (error) {
     res.status(500).json({
       message: "Avatar upload failed",
-      error,
+      error: error instanceof Error ? error.message : error,
     });
   }
 };
