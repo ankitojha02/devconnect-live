@@ -37,3 +37,41 @@ export const sendMessage = async (
     });
   }
 };
+
+export const getMessages = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const otherUserId = req.params.userId;
+
+    if (!req.userId) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
+
+   const messages = await Message.find({
+  $or: [
+    {
+      sender: req.userId as any,
+      receiver: otherUserId as any,
+    },
+    {
+      sender: otherUserId as any,
+      receiver: req.userId as any,
+    },
+  ],
+} as any).sort({ createdAt: 1 });
+
+    res.json({
+      message: "Messages fetched ✅",
+      messages,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch messages",
+      error,
+    });
+  }
+};
