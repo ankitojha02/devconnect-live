@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import { User } from "../models/User.js";
 import { AuthRequest } from "../types/express.js";
+import { Notification } from "../models/Notification.js";
 
 export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
@@ -21,8 +22,8 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
 
 export const followUser = async (req: AuthRequest, res: Response) => {
   try {
-    const targetUserId = req.params.id;
-    const currentUserId = req.userId;
+    const targetUserId = req.params.id as string;
+    const currentUserId = req.userId as string;
 
     if (targetUserId === currentUserId) {
       return res.status(400).json({
@@ -50,6 +51,12 @@ export const followUser = async (req: AuthRequest, res: Response) => {
 
     await user.save();
     await targetUser.save();
+
+    await Notification.create({
+  sender: currentUserId,
+  receiver: targetUserId as string,
+  type: "follow",
+});
 
     res.json({
       message: "Followed successfully ✅",

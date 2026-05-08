@@ -5,6 +5,7 @@ import postRoutes from "./routes/postRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import feedRoutes from "./routes/feedRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 import cors from "cors";
 
@@ -23,5 +24,6 @@ app.use("/api/posts", postRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/feed", feedRoutes);
+app.use("/api/notification", notificationRoutes);
 
 export default app;
