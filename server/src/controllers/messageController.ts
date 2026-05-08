@@ -24,7 +24,7 @@ export const sendMessage = async (
 
     const io = getIO();
 
-    io.emit("newMessage", message);
+   io.to(receiverId).emit("newMessage", message);
 
     res.status(201).json({
       message: "Message sent ✅",
