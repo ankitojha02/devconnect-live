@@ -15,7 +15,7 @@ export default function HomePage() {
         </h1>
 
         <p className="mt-4 text-slate-400">
-          The developer social platform
+          The developers social platform
         </p>
       </motion.div>
     </main>
