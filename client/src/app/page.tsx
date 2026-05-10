@@ -2,6 +2,10 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useState } from "react";
+import AuthModal from "@/app/components/AuthModal";
+import { Toaster } from "react-hot-toast";
+import Link from "next/link";
 import {
   ArrowRight,
   Bell,
@@ -78,7 +82,11 @@ const techStack = [
   "Node.js",
 ];
 
+
+
 export default function HomePage() {
+
+const [openAuth, setOpenAuth] = useState(false);
   return (
     <main className="overflow-hidden bg-black text-white">
       {/* BACKGROUND GLOW */}
@@ -88,41 +96,20 @@ export default function HomePage() {
         <div className="absolute bottom-[-120px] right-[-120px] h-[450px] w-[450px] rounded-full bg-yellow-400/10 blur-3xl" />
       </div>
 
+<>
+  <Toaster position="top-right" />
+
+  <AuthModal
+    isOpen={openAuth}
+    onClose={() => setOpenAuth(false)}
+  />
+
+  {/* YOUR WHOLE PAGE JSX */}
+</>
+
+
       {/* NAVBAR */}
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-8 lg:px-10">
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-4"
-        >
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-400">
-            <Code2 className="h-7 w-7 text-black" />
-          </div>
-
-          <h1 className="text-3xl font-black md:text-5xl">
-            DevConnect
-          </h1>
-        </motion.div>
-
-        <div className="hidden items-center gap-10 md:flex">
-          <a className="cursor-pointer text-gray-300 transition hover:text-yellow-400">
-            Features
-          </a>
-
-          <a className="cursor-pointer text-gray-300 transition hover:text-yellow-400">
-            Community
-          </a>
-
-          <a className="cursor-pointer text-gray-300 transition hover:text-yellow-400">
-            Developers
-          </a>
-
-          <button className="rounded-2xl bg-yellow-400 px-7 py-4 font-bold text-black transition hover:scale-105">
-            Get Started
-          </button>
-        </div>
-      </nav>
-
+     
       {/* HERO SECTION */}
       <section className="mx-auto grid min-h-screen max-w-7xl grid-cols-1 items-center gap-20 px-6 py-10 lg:grid-cols-2 lg:px-10">
         {/* LEFT */}
@@ -157,7 +144,10 @@ export default function HomePage() {
 
           {/* BUTTONS */}
           <div className="flex flex-col gap-5 sm:flex-row">
-            <button className="flex items-center justify-center gap-3 rounded-2xl bg-yellow-400 px-8 py-5 text-lg font-bold text-black shadow-2xl shadow-yellow-400/20 transition hover:scale-105">
+            <button 
+              onClick={() => setOpenAuth(true)}
+              className="flex items-center justify-center gap-3 rounded-2xl bg-yellow-400 px-8 py-5 text-lg font-bold text-black shadow-2xl shadow-yellow-400/20 transition hover:scale-105"
+            >
               Start Building
               <ArrowRight className="h-5 w-5" />
             </button>
@@ -396,7 +386,10 @@ export default function HomePage() {
             and grow your technical career with DevConnect.
           </p>
 
-          <button className="mt-10 rounded-2xl bg-yellow-400 px-10 py-5 text-lg font-black text-black transition hover:scale-105">
+          <button 
+            onClick={() => setOpenAuth(true)}
+            className="mt-10 rounded-2xl bg-yellow-400 px-10 py-5 text-lg font-black text-black transition hover:scale-105"
+          >
             Start Building 🚀
           </button>
         </div>
@@ -561,123 +554,7 @@ export default function HomePage() {
 </section>
 
 {/* FOOTER */}
-<footer className="border-t border-white/10 bg-[#080808]">
-  <div className="mx-auto grid max-w-7xl grid-cols-1 gap-14 px-6 py-20 md:grid-cols-2 lg:grid-cols-4 lg:px-10">
-    {/* BRAND */}
-    <div>
-      <div className="flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-400">
-          <Code2 className="h-7 w-7 text-black" />
-        </div>
 
-        <h2 className="text-3xl font-black">
-          DevConnect
-        </h2>
-      </div>
-
-      <p className="mt-6 leading-relaxed text-gray-400">
-        The next-generation social platform for developers to connect,
-        build and grow together.
-      </p>
-    </div>
-
-    {/* LINKS */}
-    <div>
-      <h3 className="mb-6 text-xl font-bold">
-        Platform
-      </h3>
-
-      <div className="space-y-4 text-gray-400">
-        <p className="transition hover:text-yellow-400">
-          Features
-        </p>
-
-        <p className="transition hover:text-yellow-400">
-          Community
-        </p>
-
-        <p className="transition hover:text-yellow-400">
-          Developers
-        </p>
-
-        <p className="transition hover:text-yellow-400">
-          Messaging
-        </p>
-      </div>
-    </div>
-
-    {/* RESOURCES */}
-    <div>
-      <h3 className="mb-6 text-xl font-bold">
-        Resources
-      </h3>
-
-      <div className="space-y-4 text-gray-400">
-        <p className="transition hover:text-yellow-400">
-          Documentation
-        </p>
-
-        <p className="transition hover:text-yellow-400">
-          API
-        </p>
-
-        <p className="transition hover:text-yellow-400">
-          Help Center
-        </p>
-
-        <p className="transition hover:text-yellow-400">
-          Support
-        </p>
-      </div>
-    </div>
-
-    {/* NEWSLETTER */}
-    <div>
-      <h3 className="mb-6 text-xl font-bold">
-        Stay Updated
-      </h3>
-
-      <p className="mb-5 text-gray-400">
-        Get updates about features and developer communities.
-      </p>
-
-      <div className="flex flex-col gap-4">
-        <input
-          type="email"
-          placeholder="Enter your email"
-          className="rounded-2xl border border-white/10 bg-[#121212] px-5 py-4 outline-none placeholder:text-gray-500 focus:border-yellow-400"
-        />
-
-        <button className="rounded-2xl bg-yellow-400 px-5 py-4 font-bold text-black transition hover:scale-[1.02]">
-          Subscribe
-        </button>
-      </div>
-    </div>
-  </div>
-
-  {/* BOTTOM */}
-  <div className="border-t border-white/10 px-6 py-8">
-    <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-sm text-gray-500 md:flex-row">
-      <p>
-        © 2026 DevConnect. All rights reserved.
-      </p>
-
-      <div className="flex items-center gap-6">
-        <p className="transition hover:text-yellow-400">
-          Privacy Policy
-        </p>
-
-        <p className="transition hover:text-yellow-400">
-          Terms
-        </p>
-
-        <p className="transition hover:text-yellow-400">
-          Security
-        </p>
-      </div>
-    </div>
-  </div>
-</footer>
     </main>
   );
 }
