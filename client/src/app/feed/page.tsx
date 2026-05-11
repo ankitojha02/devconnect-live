@@ -21,15 +21,17 @@ import {
 
 interface PostType {
   _id: string;
-  text: string;
+  content: string;
   image?: string;
   likes: string[];
   comments: any[];
-  user: {
+
+  author: {
     _id: string;
     name: string;
     username: string;
     avatar?: string;
+    bio?: string;
   };
 }
 
@@ -261,13 +263,14 @@ const fetchPosts = async () => {
             </button>
 
             <div className="h-12 w-12 overflow-hidden rounded-2xl bg-yellow-400">
-              <Image
-                src="/developers.png"
-                alt="profile"
-                width={100}
-                height={100}
-                className="h-full w-full object-cover"
-              />
+             <img
+          src={
+            user?.avatar ||
+            "/developers.png"
+          }
+          alt="profile"
+          className="h-full w-full object-cover"
+        />
             </div>
           </div>
         </div>
@@ -420,7 +423,7 @@ const fetchPosts = async () => {
                   <div className="h-14 w-14 overflow-hidden rounded-2xl bg-yellow-400">
                    <img
   src={
-    post.user?.avatar ||
+    post.author?.avatar ||
     "/developers.png"
   }
   alt="avatar"
@@ -430,11 +433,11 @@ const fetchPosts = async () => {
 
                   <div>
                     <h3 className="font-bold">
-                      {post.user?.name}
+                      {post.author?.name}
                     </h3>
 
                     <p className="text-sm text-zinc-500">
-                      @{post.user?.username}
+                      @{post.author?.username}
                     </p>
                   </div>
                 </div>
@@ -442,7 +445,7 @@ const fetchPosts = async () => {
                 {/* TEXT */}
 
                 <p className="mt-6 text-lg leading-relaxed text-zinc-300">
-                  {post.text}
+                  {post.content}
                 </p>
 
                 {/* IMAGE */}
