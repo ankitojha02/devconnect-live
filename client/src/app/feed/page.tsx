@@ -73,7 +73,17 @@ useEffect(() => {
 
 const fetchPosts = async () => {
   try {
-    const res = await fetch(`${API}/posts`);
+    const token =
+  localStorage.getItem("token");
+
+const res = await fetch(
+  `${API}/posts`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
     const data = await res.json();
 
