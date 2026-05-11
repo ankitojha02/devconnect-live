@@ -1,7 +1,8 @@
 import { Response } from "express";
 import { Post } from "../models/Post.js";
 import { AuthRequest } from "../types/express.js";
-
+import cloudinary from "../config/cloudinary.js";
+import streamifier from "streamifier";
 
 export const createPost = async (
   req: AuthRequest,
@@ -12,16 +13,51 @@ export const createPost = async (
 
     let imageUrl = "";
 
-    // IMAGE FROM CLOUDINARY
+    // ================= IMAGE UPLOAD =================
+
     if (req.file) {
-      imageUrl = req.file.path;
+      const streamUpload = () => {
+        return new Promise<any>(
+          (resolve, reject) => {
+            const stream =
+              cloudinary.uploader.upload_stream(
+                {
+                  folder: "devconnect/posts",
+                },
+
+                (error, result) => {
+                  if (result) {
+                    resolve(result);
+                  } else {
+                    reject(error);
+                  }
+                }
+              );
+
+            streamifier
+              .createReadStream(
+                req.file!.buffer
+              )
+              .pipe(stream);
+          }
+        );
+      };
+
+      const result =
+        await streamUpload();
+
+      imageUrl = result.secure_url;
     }
+
+    // ================= CREATE POST =================
 
     const post = await Post.create({
       content,
       image: imageUrl,
       author: req.userId as string,
     });
+
+    // ================= POPULATE =================
 
     const populatedPost =
       await Post.findById(post._id)
@@ -35,6 +71,8 @@ export const createPost = async (
       post: populatedPost,
     });
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: "Create post failed",
       error,
