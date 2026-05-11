@@ -1,4 +1,5 @@
 import express from "express";
+import { upload } from "../middleware/uploadMiddleware.js";
 import {
   createPost,
   getAllPosts,
@@ -12,7 +13,12 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", protect, createPost);
+router.post(
+  "/",
+  protect,
+  upload.single("image"),
+  createPost
+);
 
 router.get("/", protect, getAllPosts);
 

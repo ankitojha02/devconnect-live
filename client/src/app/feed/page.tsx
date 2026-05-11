@@ -137,6 +137,11 @@ const fetchPosts = async () => {
       setText("");
       setImage(null);
 
+      setPosts((prev) => [
+  data.post,
+  ...prev,
+]);
+
       fetchPosts();
     } catch (error) {
       console.log(error);
@@ -431,15 +436,19 @@ const fetchPosts = async () => {
 />
                   </div>
 
-                  <div>
-                    <h3 className="font-bold">
-                      {post.author?.name}
-                    </h3>
+                 <div>
+  <h3 className="font-bold">
+    {post.author?.name}
+  </h3>
 
-                    <p className="text-sm text-zinc-500">
-                      @{post.author?.username}
-                    </p>
-                  </div>
+  <p className="text-sm text-zinc-500">
+    @{post.author?.username}
+  </p>
+
+  <p className="mt-1 text-xs text-zinc-600">
+    {post.author?.bio}
+  </p>
+</div>
                 </div>
 
                 {/* TEXT */}

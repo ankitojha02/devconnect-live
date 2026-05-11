@@ -2,22 +2,37 @@ import { Response } from "express";
 import { Post } from "../models/Post.js";
 import { AuthRequest } from "../types/express.js";
 
+
 export const createPost = async (
   req: AuthRequest,
   res: Response
 ) => {
   try {
-    const { content, image } = req.body;
+    const { content } = req.body;
+
+    let imageUrl = "";
+
+    // IMAGE FROM CLOUDINARY
+    if (req.file) {
+      imageUrl = req.file.path;
+    }
 
     const post = await Post.create({
       content,
-      image,
+      image: imageUrl,
       author: req.userId as string,
     });
 
+    const populatedPost =
+      await Post.findById(post._id)
+        .populate(
+          "author",
+          "name username avatar bio"
+        );
+
     res.status(201).json({
       message: "Post created ✅",
-      post,
+      post: populatedPost,
     });
   } catch (error) {
     res.status(500).json({
