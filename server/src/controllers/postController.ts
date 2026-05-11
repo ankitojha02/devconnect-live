@@ -33,7 +33,10 @@ export const getAllPosts = async (
 ) => {
   try {
     const posts = await Post.find()
-      .populate("author", "name email")
+      .populate(
+        "author",
+        "name email username avatar bio"
+      )
       .populate("likes", "name")
       .sort({ createdAt: -1 });
 

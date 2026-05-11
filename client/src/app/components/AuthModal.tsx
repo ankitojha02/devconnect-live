@@ -6,6 +6,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
 import { api } from "@/app/services/api";
+import { useRouter } from "next/navigation";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -19,6 +20,8 @@ export default function AuthModal({
   const [isLogin, setIsLogin] = useState(true);
 
   const [loading, setLoading] = useState(false);
+
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -55,6 +58,11 @@ export default function AuthModal({
 
       Cookies.set("token", res.data.token);
 
+       localStorage.setItem(
+      "token",
+      res.data.token
+    );
+
       localStorage.setItem(
         "user",
         JSON.stringify(res.data.user)
@@ -67,6 +75,7 @@ export default function AuthModal({
       );
 
       onClose();
+      router.push("/feed");
     } catch (error: any) {
       toast.error(
         error.response?.data?.message ||
