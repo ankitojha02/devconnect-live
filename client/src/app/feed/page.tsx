@@ -112,7 +112,7 @@ const fetchPosts = async () => {
 
       const formData = new FormData();
 
-      formData.append("text", text);
+      formData.append("content", text);
 
       if (image) {
         formData.append("image", image);

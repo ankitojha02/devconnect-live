@@ -3,41 +3,96 @@ import { User } from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export const signup = async (req: Request, res: Response) => {
+export const signup = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const { name, email, password } = req.body;
+    const {
+      name,
+      email,
+      password,
+      username,
+    } = req.body;
 
-    const existingUser = await User.findOne({ email });
+    const existingUser =
+      await User.findOne({ email });
+
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({
+        message: "User already exists",
+      });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword =
+      await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name,
       email,
+      username,
       password: hashedPassword,
+      bio: "",
+      avatar: "",
     });
 
-    res.status(201).json({ message: "User created", user });
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "7d" }
+    );
+
+    res.status(201).json({
+      message: "User created ✅",
+
+      token,
+
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        bio: user.bio,
+        avatar: user.avatar,
+        followers: user.followers,
+        following: user.following,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: "Signup failed", error });
+    res.status(500).json({
+      message: "Signup failed",
+      error,
+    });
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      email,
+    });
+
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
+
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
     }
 
     const token = jwt.sign(
@@ -46,8 +101,26 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: "7d" }
     );
 
-    res.json({ message: "Login successful", token });
+    res.json({
+      message: "Login successful ✅",
+
+      token,
+
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        bio: user.bio,
+        avatar: user.avatar,
+        followers: user.followers,
+        following: user.following,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: "Login failed", error });
+    res.status(500).json({
+      message: "Login failed",
+      error,
+    });
   }
 };
