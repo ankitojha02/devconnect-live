@@ -278,15 +278,15 @@ const fetchPosts = async () => {
 
       {/* ===================== MAIN ===================== */}
 
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-8 lg:grid-cols-[280px_1fr_320px] lg:px-8">
+<div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-3 py-5 lg:grid-cols-[280px_1fr_320px] lg:gap-8 lg:px-8 lg:py-8">
         {/* ================= LEFT SIDEBAR ================= */}
 
        {/* ================= LEFT SIDEBAR ================= */}
 
-<aside className="hidden lg:block">
-  <div className="sticky top-28 rounded-[32px] border border-zinc-800 bg-[#111111] p-6">
+<aside className="block">
+ <div className="rounded-[32px] border border-zinc-800 bg-[#111111] p-5 lg:sticky lg:top-28 lg:p-6">
     <div className="flex flex-col items-center text-center">
-      <div className="h-28 w-28 overflow-hidden rounded-3xl bg-yellow-400">
+      <div className="h-20 w-20 overflow-hidden rounded-3xl bg-yellow-400 lg:h-28 lg:w-28">
         <img
           src={
             user?.avatar ||
@@ -297,23 +297,23 @@ const fetchPosts = async () => {
         />
       </div>
 
-      <h2 className="mt-5 text-2xl font-black">
+      <h2 className="mt-4 text-xl font-black lg:text-2xl">
         {user?.name || "Developer"}
       </h2>
 
-      <p className="mt-2 text-zinc-400">
+      <p className="mt-1 text-sm text-zinc-400">
         @{user?.username || "username"}
       </p>
 
-      <p className="mt-4 text-sm leading-relaxed text-zinc-500">
+      <p className="mt-3 text-xs leading-relaxed text-zinc-500 lg:text-sm">
         {user?.bio ||
           "No bio added yet 🚀"}
       </p>
 
       {/* STATS */}
 
-      <div className="mt-8 grid w-full grid-cols-3 gap-3">
-        <div className="rounded-2xl bg-black p-4">
+<div className="mt-6 grid w-full grid-cols-3 gap-2 lg:gap-3">
+        <div className="rounded-2xl bg-black p-3 lg:p-4">
           <h3 className="text-xl font-black text-yellow-400">
             {posts?.length || 0}
           </h3>
@@ -323,7 +323,7 @@ const fetchPosts = async () => {
           </p>
         </div>
 
-        <div className="rounded-2xl bg-black p-4">
+        <div className="rounded-2xl bg-black p-3 lg:p-4">
           <h3 className="text-xl font-black text-yellow-400">
             {user?.followers?.length || 0}
           </h3>
@@ -333,7 +333,7 @@ const fetchPosts = async () => {
           </p>
         </div>
 
-        <div className="rounded-2xl bg-black p-4">
+        <div className="rounded-2xl bg-black p-3 lg:p-4">
           <h3 className="text-xl font-black text-yellow-400">
             {user?.following?.length || 0}
           </h3>
@@ -348,7 +348,7 @@ const fetchPosts = async () => {
         onClick={() =>
           router.push("/profile")
         }
-        className="mt-8 w-full rounded-2xl bg-yellow-400 px-5 py-4 font-bold text-black transition hover:scale-[1.02]"
+        className="mt-6 w-full rounded-2xl bg-yellow-400 px-5 py-3 text-sm font-bold text-black transition hover:scale-[1.02] lg:py-4 lg:text-base"
       >
         Edit Profile
       </button>
