@@ -285,26 +285,86 @@ const addComment = async (
 };
 
 
+// ================= CHECK FOLLOWING =================
+
+const isFollowing = (
+  id: string
+) => {
+  return user?.following?.includes(id);
+};
+
   // ================= FOLLOW USER =================
+// ================= FOLLOW / UNFOLLOW USER =================
 
-  const followUser = async (id: string) => {
-    try {
-      const token = localStorage.getItem("token");
+const followUser = async (
+  id: string
+) => {
+  try {
+    const token =
+      localStorage.getItem("token");
 
-      const res = await fetch(`${API}/user/follow/${id}`, {
+    const endpoint =
+      isFollowing(id)
+        ? `${API}/user/unfollow/${id}`
+        : `${API}/user/follow/${id}`;
+
+    const res = await fetch(
+      endpoint,
+      {
         method: "POST",
+
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      });
+      }
+    );
 
-      const data = await res.json();
+    const data = await res.json();
 
-      toast.success(data.message || "Followed");
-    } catch (error) {
-      console.log(error);
+    if (!res.ok) {
+      return toast.error(
+        data.message
+      );
     }
-  };
+
+    toast.success(data.message);
+
+    // UPDATE LOCAL USER STATE
+
+    let updatedFollowing =
+      [...(user?.following || [])];
+
+    if (isFollowing(id)) {
+      updatedFollowing =
+        updatedFollowing.filter(
+          (f: string) => f !== id
+        );
+    }
+
+    else {
+      updatedFollowing.push(id);
+    }
+
+    const updatedUser = {
+      ...user,
+      following: updatedFollowing,
+    };
+
+    setUser(updatedUser);
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(updatedUser)
+    );
+
+  } catch (error) {
+    console.log(error);
+
+    toast.error(
+      "Something went wrong"
+    );
+  }
+};
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -346,16 +406,16 @@ const addComment = async (
   {users.length > 0 && (
     <div className="absolute left-0 right-0 top-20 z-50 rounded-3xl border border-zinc-800 bg-[#111111] p-3 shadow-2xl">
       <div className="max-h-[400px] space-y-3 overflow-y-auto">
-        {users.map((user) => (
+        {users.map((dev) => (
           <div
-            key={user._id}
+            key={dev._id}
             className="flex items-center justify-between rounded-2xl bg-black p-4 transition hover:bg-zinc-900"
           >
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 overflow-hidden rounded-2xl bg-yellow-400">
                 <img
                   src={
-                    user?.avatar ||
+                    dev?.avatar ||
                     "/developers.png"
                   }
                   alt="user"
@@ -365,15 +425,15 @@ const addComment = async (
 
               <div>
                 <h3 className="font-bold">
-                  {user.name}
+                  {dev.name}
                 </h3>
 
                 <p className="text-sm text-zinc-500">
-                  @{user.username}
+                  @{dev.username}
                 </p>
 
                 <p className="text-xs text-zinc-600">
-                  {user.bio ||
+                  {dev.bio ||
                     "Developer"}
                 </p>
               </div>
@@ -381,11 +441,17 @@ const addComment = async (
 
             <button
               onClick={() =>
-                followUser(user._id)
+                followUser(dev._id)
               }
-              className="rounded-xl bg-yellow-400 px-4 py-2 text-sm font-bold text-black"
+              className={`rounded-xl px-4 py-2 text-sm font-bold transition ${
+  isFollowing(dev._id)
+    ? "bg-zinc-700 text-white"
+    : "bg-yellow-400 text-black"
+}`}
             >
-              Follow
+              {isFollowing(dev._id)
+  ? "Following"
+  : "Follow"}
             </button>
           </div>
         ))}
@@ -452,16 +518,16 @@ const addComment = async (
     {users.length > 0 && (
       <div className="absolute left-0 right-0 top-16 z-50 rounded-3xl border border-zinc-800 bg-[#111111] p-3 shadow-2xl">
         <div className="max-h-[350px] space-y-3 overflow-y-auto">
-          {users.map((user) => (
+          {users.map((dev) => (
             <div
-              key={user._id}
+              key={dev._id}
               className="flex items-center justify-between rounded-2xl bg-black p-3"
             >
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 overflow-hidden rounded-2xl bg-yellow-400">
                   <img
                     src={
-                      user?.avatar ||
+                      dev?.avatar ||
                       "/developers.png"
                     }
                     alt="user"
@@ -471,22 +537,28 @@ const addComment = async (
 
                 <div>
                   <h3 className="text-sm font-bold">
-                    {user.name}
+                    {dev.name}
                   </h3>
 
                   <p className="text-xs text-zinc-500">
-                    @{user.username}
+                    @{dev.username}
                   </p>
                 </div>
               </div>
 
               <button
                 onClick={() =>
-                  followUser(user._id)
+                  followUser(dev._id)
                 }
-                className="rounded-xl bg-yellow-400 px-3 py-2 text-xs font-bold text-black"
+               className={`rounded-xl px-3 py-2 text-xs font-bold transition ${
+  isFollowing(dev._id)
+    ? "bg-zinc-700 text-white"
+    : "bg-yellow-400 text-black"
+}`}
               >
-                Follow
+                {isFollowing(dev._id)
+  ? "Following"
+  : "Follow"}
               </button>
             </div>
           ))}
