@@ -24,7 +24,14 @@ interface PostType {
   content: string;
   image?: string;
   likes: string[];
-  comments: any[];
+  comments: {
+  _id?: string;
+  text: string;
+  user?: {
+    name?: string;
+    username?: string;
+  };
+}[];
 
   author: {
     _id: string;
@@ -46,6 +53,8 @@ export default function FeedPage() {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
+  const [commentText, setCommentText] =
+  useState<{ [key: string]: string }>({});
 
   const router = useRouter();
 
@@ -186,14 +195,22 @@ const res = await fetch(
     try {
       setSearch(value);
 
-      if (!value) {
-        setUsers([]);
-        return;
-      }
+     if (value.trim().length < 2) {
+  setUsers([]);
+  return;
+}
 
-      const res = await fetch(
-        `${API}/user/search/users?search=${value}`
-      );
+     const token =
+  localStorage.getItem("token");
+
+const res = await fetch(
+  `${API}/user/search/users?search=${value}`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
       const data = await res.json();
 
@@ -202,6 +219,71 @@ const res = await fetch(
       console.log(error);
     }
   };
+
+
+// ================= ADD COMMENT =================
+
+const addComment = async (
+  postId: string
+) => {
+  try {
+    const token =
+      localStorage.getItem("token");
+
+    const text =
+      commentText[postId];
+
+    if (!text?.trim()) {
+      return toast.error(
+        "Write a comment"
+      );
+    }
+
+    const res = await fetch(
+      `${API}/posts/${postId}/comment`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          Authorization: `Bearer ${token}`,
+        },
+
+        body: JSON.stringify({
+          text,
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return toast.error(
+        data.message ||
+          "Comment failed"
+      );
+    }
+
+    toast.success("Comment added");
+
+    setCommentText((prev) => ({
+      ...prev,
+      [postId]: "",
+    }));
+
+    fetchPosts();
+
+  } catch (error) {
+    console.log(error);
+
+    toast.error(
+      "Something went wrong"
+    );
+  }
+};
+
 
   // ================= FOLLOW USER =================
 
@@ -232,7 +314,7 @@ const res = await fetch(
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
           {/* LOGO */}
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-3 sm:items-center sm:gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-400">
               <Home className="h-7 w-7 text-black" />
             </div>
@@ -244,36 +326,90 @@ const res = await fetch(
 
           {/* SEARCH */}
 
-          <div className="hidden w-full max-w-xl lg:block">
-            <div className="flex items-center gap-3 rounded-2xl bg-[#111111] px-5 py-4">
-              <Search className="h-5 w-5 text-yellow-400" />
+        <div className="relative hidden w-full max-w-xl lg:block">
+  <div className="flex items-center gap-3 rounded-2xl bg-[#111111] px-5 py-4">
+    <Search className="h-5 w-5 text-yellow-400" />
 
-              <input
-                type="text"
-                placeholder="Search developers..."
-                value={search}
-                onChange={(e) => searchUsers(e.target.value)}
-                className="w-full bg-transparent outline-none"
-              />
+    <input
+      type="text"
+      placeholder="Search developers..."
+      value={search}
+      onChange={(e) =>
+        searchUsers(e.target.value)
+      }
+      className="w-full bg-transparent outline-none"
+    />
+  </div>
+
+  {/* SEARCH RESULTS */}
+
+  {users.length > 0 && (
+    <div className="absolute left-0 right-0 top-20 z-50 rounded-3xl border border-zinc-800 bg-[#111111] p-3 shadow-2xl">
+      <div className="max-h-[400px] space-y-3 overflow-y-auto">
+        {users.map((user) => (
+          <div
+            key={user._id}
+            className="flex items-center justify-between rounded-2xl bg-black p-4 transition hover:bg-zinc-900"
+          >
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 overflow-hidden rounded-2xl bg-yellow-400">
+                <img
+                  src={
+                    user?.avatar ||
+                    "/developers.png"
+                  }
+                  alt="user"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+
+              <div>
+                <h3 className="font-bold">
+                  {user.name}
+                </h3>
+
+                <p className="text-sm text-zinc-500">
+                  @{user.username}
+                </p>
+
+                <p className="text-xs text-zinc-600">
+                  {user.bio ||
+                    "Developer"}
+                </p>
+              </div>
             </div>
+
+            <button
+              onClick={() =>
+                followUser(user._id)
+              }
+              className="rounded-xl bg-yellow-400 px-4 py-2 text-sm font-bold text-black"
+            >
+              Follow
+            </button>
           </div>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
 
           {/* NAV ICONS */}
 
-          <div className="flex items-center gap-5">
-            <button className="text-zinc-300 transition hover:text-yellow-400">
+          <div className="flex items-center gap-3 sm:gap-5">
+<button className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block">
               <Home className="h-6 w-6" />
             </button>
 
-            <button className="text-zinc-300 transition hover:text-yellow-400">
+<button className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block">
               <Compass className="h-6 w-6" />
             </button>
 
-            <button className="text-zinc-300 transition hover:text-yellow-400">
+<button className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block">
               <Bell className="h-6 w-6" />
             </button>
 
-            <button className="text-zinc-300 transition hover:text-yellow-400">
+<button className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block">
               <Settings className="h-6 w-6" />
             </button>
 
@@ -291,14 +427,83 @@ const res = await fetch(
         </div>
       </nav>
 
+
+      {/* MOBILE SEARCH */}
+{/* MOBILE SEARCH */}
+
+<div className="border-b border-zinc-800 bg-black px-3 py-3 lg:hidden">
+  <div className="relative">
+    <div className="flex items-center gap-3 rounded-2xl bg-[#111111] px-4 py-3">
+      <Search className="h-5 w-5 text-yellow-400" />
+
+      <input
+        type="text"
+        placeholder="Search developers..."
+        value={search}
+        onChange={(e) =>
+          searchUsers(e.target.value)
+        }
+        className="w-full bg-transparent text-sm outline-none"
+      />
+    </div>
+
+    {/* MOBILE SEARCH RESULTS */}
+
+    {users.length > 0 && (
+      <div className="absolute left-0 right-0 top-16 z-50 rounded-3xl border border-zinc-800 bg-[#111111] p-3 shadow-2xl">
+        <div className="max-h-[350px] space-y-3 overflow-y-auto">
+          {users.map((user) => (
+            <div
+              key={user._id}
+              className="flex items-center justify-between rounded-2xl bg-black p-3"
+            >
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 overflow-hidden rounded-2xl bg-yellow-400">
+                  <img
+                    src={
+                      user?.avatar ||
+                      "/developers.png"
+                    }
+                    alt="user"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold">
+                    {user.name}
+                  </h3>
+
+                  <p className="text-xs text-zinc-500">
+                    @{user.username}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() =>
+                  followUser(user._id)
+                }
+                className="rounded-xl bg-yellow-400 px-3 py-2 text-xs font-bold text-black"
+              >
+                Follow
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+</div>
+
       {/* ===================== MAIN ===================== */}
 
-<div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-3 py-5 lg:grid-cols-[280px_1fr_320px] lg:gap-8 lg:px-8 lg:py-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-5 px-3 py-4 sm:px-4 md:px-5 lg:grid-cols-[260px_1fr_300px] lg:gap-8 lg:px-8 lg:py-8">
         {/* ================= LEFT SIDEBAR ================= */}
 
        {/* ================= LEFT SIDEBAR ================= */}
 
-<aside className="block">
+<aside className="order-1 lg:order-none">
  <div className="rounded-[32px] border border-zinc-800 bg-[#111111] p-5 lg:sticky lg:top-28 lg:p-6">
     <div className="flex flex-col items-center text-center">
       <div className="h-20 w-20 overflow-hidden rounded-3xl bg-yellow-400 lg:h-28 lg:w-28">
@@ -326,38 +531,37 @@ const res = await fetch(
       </p>
 
       {/* STATS */}
+<div className="mt-6 grid w-full grid-cols-3 gap-2 sm:gap-3">
+  <div className="rounded-2xl bg-black px-2 py-4 sm:px-3 lg:px-4">
+    <h3 className="text-lg font-black text-yellow-400 sm:text-xl">
+      {posts?.length || 0}
+    </h3>
 
-<div className="mt-6 grid w-full grid-cols-3 gap-2 lg:gap-3">
-        <div className="rounded-2xl bg-black p-3 lg:p-4">
-          <h3 className="text-xl font-black text-yellow-400">
-            {posts?.length || 0}
-          </h3>
+    <p className="mt-1 text-[11px] text-zinc-500 sm:text-xs">
+      Posts
+    </p>
+  </div>
 
-          <p className="mt-1 text-xs text-zinc-500">
-            Posts
-          </p>
-        </div>
+  <div className="rounded-2xl bg-black px-2 py-4 sm:px-3 lg:px-4">
+    <h3 className="text-lg font-black text-yellow-400 sm:text-xl">
+      {user?.followers?.length || 0}
+    </h3>
 
-        <div className="rounded-2xl bg-black p-3 lg:p-4">
-          <h3 className="text-xl font-black text-yellow-400">
-            {user?.followers?.length || 0}
-          </h3>
+    <p className="mt-1 break-words text-[10px] leading-tight text-zinc-500 sm:text-xs">
+      Followers
+    </p>
+  </div>
 
-          <p className="mt-1 text-xs text-zinc-500">
-            Followers
-          </p>
-        </div>
+  <div className="rounded-2xl bg-black px-2 py-4 sm:px-3 lg:px-4">
+    <h3 className="text-lg font-black text-yellow-400 sm:text-xl">
+      {user?.following?.length || 0}
+    </h3>
 
-        <div className="rounded-2xl bg-black p-3 lg:p-4">
-          <h3 className="text-xl font-black text-yellow-400">
-            {user?.following?.length || 0}
-          </h3>
-
-          <p className="mt-1 text-xs text-zinc-500">
-            Following
-          </p>
-        </div>
-      </div>
+    <p className="mt-1 break-words text-[10px] leading-tight text-zinc-500 sm:text-xs">
+      Following
+    </p>
+  </div>
+</div>
 
       <button
         onClick={() =>
@@ -373,10 +577,10 @@ const res = await fetch(
 
         {/* ================= FEED ================= */}
 
-        <section>
+      <section className="order-2">
           {/* CREATE POST */}
 
-          <div className="rounded-[32px] border border-zinc-800 bg-[#111111] p-6">
+          <div className="rounded-[28px] border border-zinc-800 bg-[#111111] p-4 sm:p-5 lg:p-6">
             <div className="flex gap-4">
               <div className="h-14 w-14 overflow-hidden rounded-2xl bg-yellow-400">
                <img
@@ -393,7 +597,7 @@ const res = await fetch(
                 placeholder="Share something with developers..."
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className="min-h-[120px] w-full resize-none rounded-2xl bg-black p-5 outline-none"
+                className="min-h-[100px] w-full resize-none rounded-2xl bg-black p-4 text-sm outline-none sm:min-h-[120px] sm:p-5 sm:text-base"
               />
             </div>
 
@@ -415,7 +619,7 @@ const res = await fetch(
               <button
                 onClick={createPost}
                 disabled={loading}
-                className="flex items-center justify-center gap-3 rounded-2xl bg-yellow-400 px-8 py-4 font-bold text-black transition hover:scale-105"
+                className="flex w-full items-center justify-center gap-3 rounded-2xl bg-yellow-400 px-6 py-3 font-bold text-black transition hover:scale-105 sm:w-auto sm:px-8 sm:py-4"
               >
                 <PlusSquare className="h-5 w-5" />
 
@@ -430,11 +634,11 @@ const res = await fetch(
             {Array.isArray(posts) && posts.map((post) => (
               <div
                 key={post._id}
-                className="rounded-[32px] border border-zinc-800 bg-[#111111] p-6"
+                className="rounded-[28px] border border-zinc-800 bg-[#111111] p-4 sm:p-5 lg:p-6"
               >
                 {/* USER */}
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-start gap-3 sm:items-center sm:gap-4">
                   <div className="h-14 w-14 overflow-hidden rounded-2xl bg-yellow-400">
                    <img
   src={
@@ -463,7 +667,7 @@ const res = await fetch(
 
                 {/* TEXT */}
 
-                <p className="mt-6 text-lg leading-relaxed text-zinc-300">
+                <p className="mt-5 text-sm leading-relaxed text-zinc-300 sm:text-base lg:text-lg">
                   {post.content}
                 </p>
 
@@ -473,13 +677,69 @@ const res = await fetch(
                   <img
                     src={post.image}
                     alt="post"
-                    className="mt-6 max-h-[600px] w-full rounded-3xl object-cover"
+                    className="mt-5 max-h-[500px] w-full rounded-2xl object-cover sm:rounded-3xl"
                   />
                 )}
 
                 {/* ACTIONS */}
 
-                <div className="mt-8 flex items-center gap-8 border-t border-zinc-800 pt-6">
+                <div className="mt-6 flex flex-wrap items-center gap-5 border-t border-zinc-800 pt-5">
+
+
+                  {/* COMMENT INPUT */}
+
+<div className="mt-5 flex flex-col gap-3 sm:flex-row">
+  <input
+    type="text"
+    placeholder="Write a comment..."
+    value={
+      commentText[post._id] || ""
+    }
+    onChange={(e) =>
+      setCommentText((prev) => ({
+        ...prev,
+        [post._id]:
+          e.target.value,
+      }))
+    }
+    className="flex-1 rounded-2xl border border-zinc-800 bg-black px-4 py-3 outline-none"
+  />
+
+  <button
+    onClick={() =>
+      addComment(post._id)
+    }
+    className="rounded-2xl bg-yellow-400 px-5 py-3 font-bold text-black sm:w-auto"
+  >
+    Comment
+  </button>
+</div>
+
+{/* COMMENTS */}
+
+<div className="mt-5 space-y-3">
+  {post.comments?.map(
+    (comment, index) => (
+      <div
+        key={index}
+        className="rounded-2xl bg-black p-4"
+      >
+        <p className="text-sm font-bold text-yellow-400">
+          @
+          {comment.user
+            ?.username ||
+            "developer"}
+        </p>
+
+        <p className="mt-1 text-sm text-zinc-300">
+          {comment.text}
+        </p>
+      </div>
+    )
+  )}
+</div>
+
+
                   <button
                     onClick={() => likePost(post._id)}
                     className="flex items-center gap-3 text-zinc-400 transition hover:text-red-500"
@@ -508,10 +768,10 @@ const res = await fetch(
 
         {/* ================= RIGHT SIDEBAR ================= */}
 
-        <aside className="space-y-8">
+        <aside className="order-3 hidden space-y-8 lg:block">
           {/* SEARCH USERS */}
 
-          <div className="rounded-[32px] border border-zinc-800 bg-[#111111] p-6">
+          <div className="rounded-[28px] border border-zinc-800 bg-[#111111] p-4 sm:p-5 lg:p-6">
             <div className="mb-6 flex items-center gap-3">
               <Search className="h-6 w-6 text-yellow-400" />
 
@@ -549,7 +809,7 @@ const res = await fetch(
 
           {/* TRENDING */}
 
-          <div className="rounded-[32px] border border-zinc-800 bg-[#111111] p-6">
+          <div className="rounded-[28px] border border-zinc-800 bg-[#111111] p-4 sm:p-5 lg:p-6">
             <div className="mb-6 flex items-center gap-3">
               <Users className="h-6 w-6 text-yellow-400" />
 

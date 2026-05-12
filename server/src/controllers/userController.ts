@@ -125,6 +125,13 @@ export const searchUsers = async (
     },
 
     {
+  username: {
+    $regex: keyword,
+    $options: "i",
+  },
+},
+
+    {
       email: {
         $regex: keyword,
         $options: "i",
@@ -133,7 +140,7 @@ export const searchUsers = async (
   ],
 } as any).select("-password");
 
-    res.json(users);
+    res.json({users,});
   } catch (error) {
     res.status(500).json({
       message: "Search failed",
