@@ -228,25 +228,25 @@ http://localhost:5000
 ## 👤 User Profile
 
 ```md
-![Profile](./screenshots/profile.png)
+![Profile](./screenshots/editprofile.png)
 ```
 
 ## 💬 Chat Section
 
 ```md
-![Chat](./screenshots/chat.png)
+![Landing](./screenshots/landing.png)
 ```
 
 ## 👥 Following List
 
 ```md
-![Following](./screenshots/following.png)
+![Features](./screenshots/features.png)
 ```
 
 ## ❤️ Posts & Interactions
 
 ```md
-![Posts](./screenshots/posts.png)
+![Login](./screenshots/login.png)
 ```
 
 ---
