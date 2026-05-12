@@ -606,7 +606,12 @@ const followUser = async (
 <div className="mt-6 grid w-full grid-cols-3 gap-2 sm:gap-3">
   <div className="rounded-2xl bg-black px-2 py-4 sm:px-3 lg:px-4">
     <h3 className="text-lg font-black text-yellow-400 sm:text-xl">
-      {posts?.length || 0}
+     {
+  posts.filter(
+    (post) =>
+      post.author?._id === user?._id
+  ).length
+}
     </h3>
 
     <p className="mt-1 text-[11px] text-zinc-500 sm:text-xs">
