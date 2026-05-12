@@ -56,6 +56,11 @@ export default function FeedPage() {
   const [commentText, setCommentText] =
   useState<{ [key: string]: string }>({});
 
+  const [followingUsers, setFollowingUsers] =
+  useState<any[]>([]);
+
+const [showFollowing, setShowFollowing] =
+  useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -284,6 +289,40 @@ const addComment = async (
   }
 };
 
+
+// ================= GET FOLLOWING USERS =================
+
+const getFollowingUsers =
+  async () => {
+    try {
+      const token =
+        localStorage.getItem("token");
+
+      const res = await fetch(
+        `${API}/user/${user?._id}/following`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      setFollowingUsers(
+        data.following || []
+      );
+
+      setShowFollowing(true);
+
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        "Failed to fetch following users"
+      );
+    }
+  };
 
 // ================= CHECK FOLLOWING =================
 
@@ -629,15 +668,18 @@ const followUser = async (
     </p>
   </div>
 
-  <div className="rounded-2xl bg-black px-2 py-4 sm:px-3 lg:px-4">
-    <h3 className="text-lg font-black text-yellow-400 sm:text-xl">
-      {user?.following?.length || 0}
-    </h3>
+ <div
+  onClick={getFollowingUsers}
+  className="cursor-pointer rounded-2xl bg-black px-2 py-4 transition hover:bg-zinc-900 sm:px-3 lg:px-4"
+>
+  <h3 className="text-lg font-black text-yellow-400 sm:text-xl">
+    {user?.following?.length || 0}
+  </h3>
 
-    <p className="mt-1 break-words text-[10px] leading-tight text-zinc-500 sm:text-xs">
-      Following
-    </p>
-  </div>
+  <p className="mt-1 break-words text-[10px] leading-tight text-zinc-500 sm:text-xs">
+    Following
+  </p>
+</div>
 </div>
 
       <button
@@ -914,6 +956,78 @@ const followUser = async (
           </div>
         </aside>
       </div>
+
+      {/* ================= FOLLOWING MODAL ================= */}
+
+{
+  showFollowing && (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+
+      <div className="w-full max-w-md rounded-[32px] border border-zinc-800 bg-[#111111] p-6">
+
+        {/* HEADER */}
+
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-black">
+            Following
+          </h2>
+
+          <button
+            onClick={() =>
+              setShowFollowing(false)
+            }
+            className="rounded-xl bg-zinc-800 px-4 py-2 text-sm"
+          >
+            Close
+          </button>
+        </div>
+
+        {/* USERS */}
+
+        <div className="max-h-[400px] space-y-4 overflow-y-auto">
+
+          {followingUsers.length === 0 ? (
+            <p className="text-zinc-500">
+              Not following anyone yet.
+            </p>
+          ) : (
+            followingUsers.map((dev) => (
+              <div
+                key={dev._id}
+                className="flex items-center gap-4 rounded-2xl bg-black p-4"
+              >
+                <div className="h-14 w-14 overflow-hidden rounded-2xl bg-yellow-400">
+                  <img
+                    src={
+                      dev.avatar ||
+                      "/developers.png"
+                    }
+                    alt="user"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                <div>
+                  <h3 className="font-bold">
+                    {dev.name}
+                  </h3>
+
+                  <p className="text-sm text-zinc-500">
+                    @{dev.username}
+                  </p>
+
+                  <p className="text-xs text-zinc-600">
+                    {dev.bio || "Developer"}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
     </main>
   );
 }
