@@ -1053,10 +1053,13 @@ const followUser = async (
             </p>
           ) : (
             followersUsers.map((dev) => (
-              <div
-                key={dev._id}
-                className="flex items-center gap-4 rounded-2xl bg-black p-4"
-              >
+             <div
+  key={dev._id}
+  onClick={() =>
+    router.push(`/user/${dev._id}`)
+  }
+  className="flex cursor-pointer items-center gap-4 rounded-2xl bg-black p-4 transition hover:bg-zinc-900"
+>
                 <div className="h-14 w-14 overflow-hidden rounded-2xl bg-yellow-400">
                   <img
                     src={
@@ -1125,10 +1128,13 @@ const followUser = async (
             </p>
           ) : (
             followingUsers.map((dev) => (
-              <div
-                key={dev._id}
-                className="flex items-center gap-4 rounded-2xl bg-black p-4"
-              >
+             <div
+  key={dev._id}
+  onClick={() =>
+    router.push(`/user/${dev._id}`)
+  }
+  className="flex cursor-pointer items-center gap-4 rounded-2xl bg-black p-4 transition hover:bg-zinc-900"
+>
                 <div className="h-14 w-14 overflow-hidden rounded-2xl bg-yellow-400">
                   <img
                     src={

@@ -40,7 +40,10 @@ router.get("/search/users", protect, searchUsers);
 
 router.get("/:id/followers", protect, async (req, res) => {
   const user = await User.findById(req.params.id)
-    .populate("followers", "name email");
+    .populate(
+      "followers",
+      "name username email avatar bio"
+    );
 
   res.json({
     followers: user?.followers,
@@ -49,7 +52,10 @@ router.get("/:id/followers", protect, async (req, res) => {
 
 router.get("/:id/following", protect, async (req, res) => {
   const user = await User.findById(req.params.id)
-    .populate("following", "name email");
+    .populate(
+      "following",
+      "name username email avatar bio"
+    );
 
   res.json({
     following: user?.following,
