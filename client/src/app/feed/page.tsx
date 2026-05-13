@@ -61,6 +61,12 @@ export default function FeedPage() {
 
 const [showFollowing, setShowFollowing] =
   useState(false);
+
+const [followersUsers, setFollowersUsers] =
+  useState<any[]>([]);
+
+const [showFollowers, setShowFollowers] =
+  useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -290,6 +296,39 @@ const addComment = async (
 };
 
 
+// ================= GET FOLLOWERS USERS =================
+
+const getFollowersUsers =
+  async () => {
+    try {
+      const token =
+        localStorage.getItem("token");
+
+      const res = await fetch(
+        `${API}/user/${user?._id}/followers`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+
+      setFollowersUsers(
+        data.followers || []
+      );
+
+      setShowFollowers(true);
+
+    } catch (error) {
+      console.log(error);
+
+      toast.error(
+        "Failed to fetch followers"
+      );
+    }
+  };
 // ================= GET FOLLOWING USERS =================
 
 const getFollowingUsers =
@@ -658,15 +697,18 @@ const followUser = async (
     </p>
   </div>
 
-  <div className="rounded-2xl bg-black px-2 py-4 sm:px-3 lg:px-4">
-    <h3 className="text-lg font-black text-yellow-400 sm:text-xl">
-      {user?.followers?.length || 0}
-    </h3>
+ <div
+  onClick={getFollowersUsers}
+  className="cursor-pointer rounded-2xl bg-black px-2 py-4 transition hover:bg-zinc-900 sm:px-3 lg:px-4"
+>
+  <h3 className="text-lg font-black text-yellow-400 sm:text-xl">
+    {user?.followers?.length || 0}
+  </h3>
 
-    <p className="mt-1 break-words text-[10px] leading-tight text-zinc-500 sm:text-xs">
-      Followers
-    </p>
-  </div>
+  <p className="mt-1 break-words text-[10px] leading-tight text-zinc-500 sm:text-xs">
+    Followers
+  </p>
+</div>
 
  <div
   onClick={getFollowingUsers}
@@ -956,6 +998,79 @@ const followUser = async (
           </div>
         </aside>
       </div>
+
+
+      {/* ================= FOLLOWERS MODAL ================= */}
+
+{
+  showFollowers && (
+    <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+
+      <div className="w-full max-w-md rounded-[32px] border border-zinc-800 bg-[#111111] p-6">
+
+        {/* HEADER */}
+
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-black">
+            Followers
+          </h2>
+
+          <button
+            onClick={() =>
+              setShowFollowers(false)
+            }
+            className="rounded-xl bg-zinc-800 px-4 py-2 text-sm"
+          >
+            Close
+          </button>
+        </div>
+
+        {/* USERS */}
+
+        <div className="max-h-[400px] space-y-4 overflow-y-auto">
+
+          {followersUsers.length === 0 ? (
+            <p className="text-zinc-500">
+              No followers yet.
+            </p>
+          ) : (
+            followersUsers.map((dev) => (
+              <div
+                key={dev._id}
+                className="flex items-center gap-4 rounded-2xl bg-black p-4"
+              >
+                <div className="h-14 w-14 overflow-hidden rounded-2xl bg-yellow-400">
+                  <img
+                    src={
+                      dev.avatar ||
+                      "/developers.png"
+                    }
+                    alt="user"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                <div>
+                  <h3 className="font-bold">
+                    {dev.name}
+                  </h3>
+
+                  <p className="text-sm text-zinc-500">
+                    @{dev.username}
+                  </p>
+
+                  <p className="text-xs text-zinc-600">
+                    {dev.bio || "Developer"}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
       {/* ================= FOLLOWING MODAL ================= */}
 
