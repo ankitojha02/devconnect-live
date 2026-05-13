@@ -481,61 +481,79 @@ const followUser = async (
 
   {/* SEARCH RESULTS */}
 
-  {users.length > 0 && (
-    <div className="absolute left-0 right-0 top-20 z-50 rounded-3xl border border-zinc-800 bg-[#111111] p-3 shadow-2xl">
-      <div className="max-h-[400px] space-y-3 overflow-y-auto">
-        {users.map((dev) => (
+ {users.length > 0 && (
+  <div className="absolute left-0 right-0 top-20 z-50 rounded-3xl border border-zinc-800 bg-[#111111] p-3 shadow-2xl">
+    
+    <div className="max-h-[420px] space-y-3 overflow-y-auto">
+      
+      {users.map((dev) => (
+        
+        <div
+          key={dev._id}
+          className="flex items-center justify-between rounded-2xl bg-black p-4 transition hover:bg-zinc-900"
+        >
+          
+          {/* LEFT USER INFO */}
+
           <div
-            key={dev._id}
-            className="flex items-center justify-between rounded-2xl bg-black p-4 transition hover:bg-zinc-900"
+            onClick={() =>
+              router.push(`/user/${dev._id}`)
+            }
+            className="flex flex-1 cursor-pointer items-center gap-3"
           >
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 overflow-hidden rounded-2xl bg-yellow-400">
-                <img
-                  src={
-                    dev?.avatar ||
-                    "/developers.png"
-                  }
-                  alt="user"
-                  className="h-full w-full object-cover"
-                />
-              </div>
+            
+            {/* AVATAR */}
 
-              <div>
-                <h3 className="font-bold">
-                  {dev.name}
-                </h3>
-
-                <p className="text-sm text-zinc-500">
-                  @{dev.username}
-                </p>
-
-                <p className="text-xs text-zinc-600">
-                  {dev.bio ||
-                    "Developer"}
-                </p>
-              </div>
+            <div className="h-12 w-12 overflow-hidden rounded-2xl bg-yellow-400">
+              <img
+                src={
+                  dev?.avatar ||
+                  "/developers.png"
+                }
+                alt="user"
+                className="h-full w-full object-cover"
+              />
             </div>
 
-            <button
-              onClick={() =>
-                followUser(dev._id)
-              }
-              className={`rounded-xl px-4 py-2 text-sm font-bold transition ${
-  isFollowing(dev._id)
-    ? "bg-zinc-700 text-white"
-    : "bg-yellow-400 text-black"
-}`}
-            >
-              {isFollowing(dev._id)
-  ? "Following"
-  : "Follow"}
-            </button>
+            {/* USER DETAILS */}
+
+            <div className="min-w-0">
+              
+              <h3 className="truncate font-bold text-white">
+                {dev.name}
+              </h3>
+
+              <p className="text-sm text-zinc-500">
+                @{dev.username}
+              </p>
+
+              <p className="truncate text-xs text-zinc-600">
+                {dev.bio || "Developer"}
+              </p>
+            </div>
           </div>
-        ))}
-      </div>
+
+          {/* FOLLOW BUTTON */}
+
+          <button
+            onClick={() =>
+              followUser(dev._id)
+            }
+            className={`ml-3 rounded-xl px-4 py-2 text-sm font-bold transition ${
+              isFollowing(dev._id)
+                ? "bg-zinc-700 text-white hover:bg-zinc-600"
+                : "bg-yellow-400 text-black hover:bg-yellow-300"
+            }`}
+          >
+            {isFollowing(dev._id)
+              ? "Following"
+              : "Follow"}
+          </button>
+        </div>
+      ))}
     </div>
-  )}
+  </div>
+)}
 </div>
 
           {/* NAV ICONS */}

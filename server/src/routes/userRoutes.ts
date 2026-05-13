@@ -55,4 +55,38 @@ router.get("/:id/following", protect, async (req, res) => {
     following: user?.following,
   });
 });
+
+router.get("/:id", async (req, res) => {
+  try {
+    const user = await User.findById(
+      req.params.id
+    )
+      .select("-password")
+
+      .populate(
+        "followers",
+        "name username avatar"
+      )
+
+      .populate(
+        "following",
+        "name username avatar"
+      );
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.json(user);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch user",
+      error,
+    });
+  }
+});
+
 export default router;
