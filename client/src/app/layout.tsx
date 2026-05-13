@@ -19,7 +19,8 @@ export default function RootLayout({
 
   const hideLayout =
     pathname.startsWith("/feed") ||
-    pathname.startsWith("/profile");
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/user/");
 
   return (
     <html lang="en">
