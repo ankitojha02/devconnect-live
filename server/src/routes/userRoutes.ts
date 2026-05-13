@@ -62,18 +62,17 @@ router.get("/:id/following", protect, async (req, res) => {
   });
 });
 
-router.get("/:id", async (req, res) => {
+
+router.get("/:id", protect, async (req, res) => {
   try {
     const user = await User.findById(
       req.params.id
     )
       .select("-password")
-
       .populate(
         "followers",
         "name username avatar"
       )
-
       .populate(
         "following",
         "name username avatar"
@@ -89,7 +88,8 @@ router.get("/:id", async (req, res) => {
 
   } catch (error) {
     res.status(500).json({
-      message: "Failed to fetch user",
+      message:
+        "Failed to fetch user",
       error,
     });
   }

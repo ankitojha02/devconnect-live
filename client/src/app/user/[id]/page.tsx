@@ -43,43 +43,54 @@ export default function UserProfilePage() {
     fetchUser();
   }, []);
 
-  const fetchUser = async () => {
-    try {
-      const token =
-        localStorage.getItem("token");
+ const fetchUser = async () => {
+  try {
+    const token =
+      localStorage.getItem("token");
 
-      // FETCH POSTS
+    // ================= USER INFO =================
 
-      const postRes = await fetch(
-        `${API}/posts`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+    const userRes = await fetch(
+      `${API}/user/${params.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const userData =
+      await userRes.json();
+
+    setUser(userData);
+
+    // ================= POSTS =================
+
+    const postRes = await fetch(
+      `${API}/posts`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const postData =
+      await postRes.json();
+
+    const userPosts =
+      postData.filter(
+        (post: PostType) =>
+          post.author?._id ===
+          params.id
       );
 
-      const postData =
-        await postRes.json();
+    setPosts(userPosts);
 
-      const userPosts =
-        postData.filter(
-          (post: PostType) =>
-            post.author?._id === params.id
-        );
-
-      setPosts(userPosts);
-
-      // GET USER INFO
-
-      if (userPosts.length > 0) {
-        setUser(userPosts[0].author);
-      }
-
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   return (
     <main className="min-h-screen bg-black px-4 py-8 text-white">
@@ -113,6 +124,40 @@ export default function UserProfilePage() {
             {user?.bio ||
               "Developer"}
           </p>
+
+          <div className="mt-6 flex items-center gap-8">
+
+  <div className="text-center">
+    <h3 className="text-2xl font-black text-yellow-400">
+      {posts.length}
+    </h3>
+
+    <p className="text-sm text-zinc-500">
+      Posts
+    </p>
+  </div>
+
+  <div className="text-center">
+    <h3 className="text-2xl font-black text-yellow-400">
+      {user?.followers?.length || 0}
+    </h3>
+
+    <p className="text-sm text-zinc-500">
+      Followers
+    </p>
+  </div>
+
+  <div className="text-center">
+    <h3 className="text-2xl font-black text-yellow-400">
+      {user?.following?.length || 0}
+    </h3>
+
+    <p className="text-sm text-zinc-500">
+      Following
+    </p>
+  </div>
+
+</div>
         </div>
       </div>
 
