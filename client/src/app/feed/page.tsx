@@ -14,7 +14,7 @@ import {
   ImageIcon,
   Bell,
   Home,
-  Compass,
+  MessageSquare,
   PlusSquare,
   Settings,
 } from "lucide-react";
@@ -563,9 +563,15 @@ const followUser = async (
               <Home className="h-6 w-6" />
             </button>
 
-<button className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block">
-              <Compass className="h-6 w-6" />
-            </button>
+<button
+  onClick={() =>
+    router.push("/messages")
+  }
+
+  className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block"
+>
+  <MessageSquare className="h-6 w-6" />
+</button>
 
 <button className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block">
               <Bell className="h-6 w-6" />

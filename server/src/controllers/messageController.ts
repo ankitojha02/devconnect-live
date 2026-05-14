@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthRequest } from "../types/express.js";
 import { Message } from "../models/Message.js";
 import { getIO } from "../socket.js";
+import { User } from "../models/User.js";
 
 export const sendMessage = async (
   req: AuthRequest,
@@ -9,6 +10,42 @@ export const sendMessage = async (
 ) => {
   try {
     const { receiverId, text } = req.body;
+
+    const senderUser = await User.findById(
+  req.userId
+);
+
+const receiverUser = await User.findById(
+  receiverId
+);
+
+if (!senderUser || !receiverUser) {
+  return res.status(404).json({
+    message: "User not found",
+  });
+}
+
+// MUTUAL FOLLOW CHECK
+
+const senderFollowsReceiver =
+  senderUser.following.includes(
+    receiverId as any
+  );
+
+const receiverFollowsSender =
+  receiverUser.following.includes(
+    req.userId as any
+  );
+
+if (
+  !senderFollowsReceiver ||
+  !receiverFollowsSender
+) {
+  return res.status(403).json({
+    message:
+      "Both users must follow each other to chat",
+  });
+}
 
     if (!req.userId) {
   return res.status(401).json({

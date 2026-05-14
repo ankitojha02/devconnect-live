@@ -50,9 +50,25 @@ export default function UserProfilePage() {
   const [posts, setPosts] =
     useState<PostType[]>([]);
 
-  useEffect(() => {
-    fetchUser();
-  }, []);
+  const [currentUser, setCurrentUser] =
+  useState<any>(null);
+
+ useEffect(() => {
+
+  fetchUser();
+
+  const storedUser =
+    localStorage.getItem("user");
+
+  if (storedUser) {
+
+    setCurrentUser(
+      JSON.parse(storedUser)
+    );
+
+  }
+
+}, []);
 
   const fetchUser = async () => {
     try {
@@ -103,6 +119,17 @@ export default function UserProfilePage() {
       console.log(error);
     }
   };
+
+const isMutualFollow =
+
+  currentUser?.following?.includes(
+    user?._id
+  ) &&
+
+  user?.following?.some(
+    (f: any) =>
+      f._id === currentUser?._id
+  );
 
   return (
 
@@ -232,6 +259,26 @@ export default function UserProfilePage() {
               </div>
 
             </div>
+
+
+            {/* MESSAGE BUTTON */}
+
+{
+  isMutualFollow && (
+
+    <button
+      onClick={() =>
+        router.push(
+          `/messages/${user?._id}`
+        )
+      }
+      className="mt-8 rounded-2xl bg-yellow-400 px-8 py-4 text-sm font-bold text-black transition hover:scale-105 sm:text-base"
+    >
+      Message
+    </button>
+
+  )
+}
 
           </div>
 
