@@ -61,7 +61,19 @@ if (
 
     const io = getIO();
 
-   io.to(receiverId).emit("newMessage", message);
+  // RECEIVER
+
+io.to(receiverId).emit(
+  "newMessage",
+  message
+);
+
+// SENDER
+
+io.to(req.userId as string).emit(
+  "newMessage",
+  message
+);
 
     res.status(201).json({
       message: "Message sent ✅",

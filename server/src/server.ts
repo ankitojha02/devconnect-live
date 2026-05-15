@@ -1,7 +1,8 @@
 import app from "./app.js";
+import http from "http";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
-import http from "http";
+
 import { initSocket } from "./socket.js";
 
 dotenv.config();

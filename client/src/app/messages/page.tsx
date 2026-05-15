@@ -3,6 +3,7 @@
 import {
   useEffect,
   useState,
+  useRef,
 } from "react";
 
 import {
@@ -15,6 +16,10 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 import toast from "react-hot-toast";
+
+import { socket } from "@/app/lib/socket";
+
+
 
 interface UserType {
   _id: string;
@@ -51,19 +56,36 @@ export default function MessagesPage() {
   const [text, setText] =
     useState("");
 
+  const [onlineUsers, setOnlineUsers] =
+  useState<string[]>([]);
+
+  const messagesEndRef =
+  useRef<HTMLDivElement | null>(
+    null
+  );
+
   const [mobileChatOpen, setMobileChatOpen] =
     useState(false);
 
-  useEffect(() => {
-    const storedUser =
-      localStorage.getItem("user");
+ useEffect(() => {
+  const storedUser =
+    localStorage.getItem("user");
 
-    if (storedUser) {
-      setCurrentUser(
-        JSON.parse(storedUser)
-      );
-    }
-  }, []);
+  if (storedUser) {
+
+    const parsedUser =
+      JSON.parse(storedUser);
+
+    setCurrentUser(parsedUser);
+
+    // JOIN SOCKET ROOM
+
+    socket.emit(
+      "join",
+      parsedUser._id
+    );
+  }
+}, []);
 
   useEffect(() => {
     if (currentUser) {
@@ -168,10 +190,7 @@ export default function MessagesPage() {
           );
         }
 
-        setMessages((prev) => [
-          ...prev,
-          data.data,
-        ]);
+      
 
         setText("");
 
@@ -183,6 +202,66 @@ export default function MessagesPage() {
         );
       }
     };
+
+
+    useEffect(() => {
+
+  socket.on(
+    "newMessage",
+    (newMessage) => {
+
+      // ONLY CURRENT CHAT
+
+      if (
+        newMessage.sender ===
+          selectedUser?._id ||
+
+        newMessage.receiver ===
+          selectedUser?._id
+      ) {
+        setMessages((prev) => [
+          ...prev,
+          newMessage,
+        ]);
+      }
+    }
+  );
+
+  return () => {
+    socket.off("newMessage");
+  };
+
+}, [selectedUser]);
+
+// ONLINE USERS
+
+useEffect(() => {
+
+  socket.on(
+    "onlineUsers",
+    (users) => {
+
+      setOnlineUsers(users);
+
+    }
+  );
+
+  return () => {
+    socket.off("onlineUsers");
+  };
+
+}, []);
+
+// AUTO SCROLL
+
+useEffect(() => {
+
+  messagesEndRef.current?.
+    scrollIntoView({
+      behavior: "smooth",
+    });
+
+}, [messages]);
 
   return (
     <main className="flex h-screen bg-black text-white">
@@ -261,16 +340,29 @@ export default function MessagesPage() {
 
                 className="h-14 w-14 rounded-2xl object-cover"
               />
-
+              
               <div className="text-left">
-                <h3 className="font-bold">
-                  {user.name}
-                </h3>
 
-                <p className="text-sm text-zinc-500">
-                  @{user.username}
-                </p>
-              </div>
+  <div className="flex items-center gap-2">
+
+    <h3 className="font-bold">
+      {user.name}
+    </h3>
+
+    {onlineUsers.includes(
+      user._id
+    ) && (
+      <div className="h-2 w-2 rounded-full bg-green-500" />
+    )}
+
+  </div>
+
+  <p className="text-sm text-zinc-500">
+    @{user.username}
+  </p>
+
+</div>
+             
             </motion.button>
 
           ))}
@@ -324,15 +416,33 @@ export default function MessagesPage() {
                 className="h-12 w-12 rounded-2xl object-cover"
               />
 
-              <div>
-                <h2 className="font-bold">
-                  {selectedUser.name}
-                </h2>
+            <div>
 
-                <p className="text-sm text-zinc-500">
-                  @{selectedUser.username}
-                </p>
-              </div>
+  <div className="flex items-center gap-2">
+
+    <h2 className="font-bold">
+      {selectedUser.name}
+    </h2>
+
+    {onlineUsers.includes(
+      selectedUser._id
+    ) ? (
+      <span className="text-xs text-green-500">
+        Online
+      </span>
+    ) : (
+      <span className="text-xs text-zinc-500">
+        Offline
+      </span>
+    )}
+
+  </div>
+
+  <p className="text-sm text-zinc-500">
+    @{selectedUser.username}
+  </p>
+
+</div>
             </div>
 
             {/* MESSAGES */}
@@ -377,6 +487,8 @@ export default function MessagesPage() {
                   </motion.div>
                 );
               })}
+
+              <div ref={messagesEndRef} />
             </div>
 
             {/* INPUT */}
