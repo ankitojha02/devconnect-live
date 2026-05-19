@@ -21,7 +21,7 @@ export default function RootLayout({
     pathname.startsWith("/feed") ||
     pathname.startsWith("/profile") ||
     pathname.startsWith("/user/") ||
-    pathname.startsWith("/messages") ;
+    pathname.startsWith("/messages") || pathname.startsWith("/notifications");
 
   return (
     <html lang="en">

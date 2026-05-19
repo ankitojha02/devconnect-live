@@ -494,9 +494,15 @@ export default function FeedPage() {
               <MessageSquare className="h-6 w-6" />
             </button>
 
-            <button className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block">
-              <Bell className="h-6 w-6" />
-            </button>
+           <button
+  onClick={() =>
+    router.push("/notifications")
+  }
+
+  className="flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-[#111111]"
+>
+  <Bell className="h-6 w-6" />
+</button>
 
             <button className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block">
               <Settings className="h-6 w-6" />
