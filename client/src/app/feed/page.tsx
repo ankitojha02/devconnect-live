@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { socket } from "@/app/lib/socket";
 import {
   Heart,
   MessageCircle,
@@ -47,6 +48,10 @@ export default function FeedPage() {
   const API = "https://devconnect-live.onrender.com/api";
 
   const [posts, setPosts] = useState<PostType[]>([]);
+  const [
+  notificationCount,
+  setNotificationCount,
+] = useState(0);
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState("");
   const [image, setImage] = useState<File | null>(null);
@@ -80,6 +85,43 @@ export default function FeedPage() {
       }
     }
   }, []);
+
+
+  useEffect(() => {
+
+  const storedUser =
+    localStorage.getItem("user");
+
+  if (storedUser) {
+
+    const parsedUser =
+      JSON.parse(storedUser);
+
+    socket.emit(
+      "join",
+      parsedUser._id
+    );
+  }
+
+  socket.on(
+    "newNotification",
+    (notification) => {
+
+      toast.success(
+        `${notification.sender.name} followed you`
+      );
+
+setNotificationCount(
+  (prev) => prev + 1
+);
+    }
+  );
+
+  return () => {
+    socket.off("newNotification");
+  };
+
+}, []);
 
   // ================= FETCH POSTS =================
 
@@ -498,10 +540,15 @@ export default function FeedPage() {
   onClick={() =>
     router.push("/notifications")
   }
-
-  className="flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-[#111111]"
+  className="relative flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-[#111111]"
 >
   <Bell className="h-6 w-6" />
+
+  {notificationCount > 0 && (
+    <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+      {notificationCount}
+    </div>
+  )}
 </button>
 
             <button className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block">
@@ -719,67 +766,49 @@ export default function FeedPage() {
                 >
                   {/* USER */}
 
-                 <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between">
+                    {/* LEFT USER INFO */}
 
-  {/* LEFT USER INFO */}
+                    <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+                      <div className="h-14 w-14 overflow-hidden rounded-2xl bg-yellow-400">
+                        <img
+                          src={post.author?.avatar || "/developers.png"}
+                          alt="avatar"
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
 
-  <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+                      <div>
+                        <h3 className="font-bold">{post.author?.name}</h3>
 
-    <div className="h-14 w-14 overflow-hidden rounded-2xl bg-yellow-400">
+                        <p className="text-sm text-zinc-500">
+                          @{post.author?.username}
+                        </p>
 
-      <img
-        src={
-          post.author?.avatar ||
-          "/developers.png"
-        }
+                        <p className="mt-1 text-xs text-zinc-600">
+                          {post.author?.bio}
+                        </p>
+                      </div>
+                    </div>
 
-        alt="avatar"
+                    {/* DELETE BUTTON */}
 
-        className="h-full w-full object-cover"
-      />
-    </div>
+                    {user?._id === post.author?._id && (
+                      <button
+                        onClick={() => {
+                          const confirmDelete =
+                            window.confirm("Delete this post?");
 
-    <div>
-
-      <h3 className="font-bold">
-        {post.author?.name}
-      </h3>
-
-      <p className="text-sm text-zinc-500">
-        @{post.author?.username}
-      </p>
-
-      <p className="mt-1 text-xs text-zinc-600">
-        {post.author?.bio}
-      </p>
-
-    </div>
-  </div>
-
-  {/* DELETE BUTTON */}
-
-  {user?._id ===
-    post.author?._id && (
-
-    <button
-      onClick={() => {
-
-        const confirmDelete =
-          window.confirm(
-            "Delete this post?"
-          );
-
-        if (confirmDelete) {
-          deletePost(post._id);
-        }
-      }}
-
-      className="flex h-11 w-11 items-center justify-center rounded-2xl bg-black text-red-500 transition hover:bg-red-500 hover:text-white"
-    >
-      <Trash2 className="h-5 w-5" />
-    </button>
-  )}
-</div>
+                          if (confirmDelete) {
+                            deletePost(post._id);
+                          }
+                        }}
+                        className="flex h-11 w-11 items-center justify-center rounded-2xl bg-black text-red-500 transition hover:bg-red-500 hover:text-white"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    )}
+                  </div>
                   {/* TEXT */}
 
                   <p className="mt-5 text-sm leading-relaxed text-zinc-300 sm:text-base lg:text-lg">

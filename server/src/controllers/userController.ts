@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { User } from "../models/User.js";
 import { AuthRequest } from "../types/express.js";
 import { Notification } from "../models/Notification.js";
-
+import { getIO } from "../socket.js";
 export const updateProfile = async (req: AuthRequest, res: Response) => {
   try {
     const { name, bio } = req.body;
@@ -52,11 +52,25 @@ export const followUser = async (req: AuthRequest, res: Response) => {
     await user.save();
     await targetUser.save();
 
-    await Notification.create({
-  sender: currentUserId,
-  receiver: targetUserId as string,
-  type: "follow",
-});
+   const notification =
+  await Notification.create({
+    sender: currentUserId,
+    receiver: targetUserId as string,
+    type: "follow",
+  });
+
+const populatedNotification =
+  await notification.populate(
+    "sender",
+    "name avatar"
+  );
+
+const io = getIO();
+
+io.to(targetUserId).emit(
+  "newNotification",
+  populatedNotification
+);
 
     res.json({
       message: "Followed successfully ✅",
