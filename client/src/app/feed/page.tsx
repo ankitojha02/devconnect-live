@@ -568,7 +568,7 @@ const followUser = async (
     router.push("/messages")
   }
 
-  className="hidden text-zinc-300 transition hover:text-yellow-400 sm:block"
+  className="text-zinc-300 transition hover:text-yellow-400 sm:block"
 >
   <MessageSquare className="h-6 w-6" />
 </button>

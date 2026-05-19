@@ -497,19 +497,25 @@ useEffect(() => {
 
               <div className="flex items-center gap-3">
 
-                <input
-                  type="text"
+             <input
+  type="text"
 
-                  value={text}
+  value={text}
 
-                  onChange={(e) =>
-                    setText(e.target.value)
-                  }
+  onChange={(e) =>
+    setText(e.target.value)
+  }
 
-                  placeholder="Type message..."
+  onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  }}
 
-                  className="flex-1 rounded-2xl bg-black px-4 py-3 text-sm outline-none sm:text-base"
-                />
+  placeholder="Type message..."
+
+  className="flex-1 rounded-2xl bg-black px-4 py-3 text-sm outline-none sm:text-base"
+/>
 
                 <motion.button
                   whileTap={{
